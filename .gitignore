@@ -1,2 +1,9 @@
+# local env files
+.env*.local
+.env
+
+/__pycache__/
+/logs/
+
 Backend/logs/observability.jsonl
 Backend/.env.exemple
