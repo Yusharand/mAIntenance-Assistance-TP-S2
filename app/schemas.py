@@ -90,6 +90,21 @@ class ChatRequest(BaseModel):
     utilisateur_id: Optional[str] = None
 
 
+class TicketSession(BaseModel):
+    """État d'un ticket en conversation multi-tours. Permet de continuer le
+    traitement après avoir posé des questions et reçu des réponses."""
+    ticket_id: str
+    categorie: str
+    priorite: str
+    equipe: str
+    etape_actuelle: Literal["classification", "demande_info", "rag_agent", "resolution"]
+    questions_restantes: list[str] = []
+    reponses_utilisateur: dict[str, str] = {}  # question -> réponse
+    contexte_diagnostic: Optional[dict] = None
+    decision_finale: Optional[DecisionFinale] = None
+    timestamp_creation: datetime = Field(default_factory=datetime.now)
+
+
 class ChatResponse(BaseModel):
     """Réponse de POST /chat : reformulation conversationnelle de la
     DecisionFinale calculée par le pipeline déterministe (classifier -> RAG ->
@@ -98,3 +113,4 @@ class ChatResponse(BaseModel):
     reponse: str
     decision: DecisionFinale
     conversation_id: Optional[str] = None
+    questions_a_poser: list[str] = []  # Ajouter les questions si demande_info

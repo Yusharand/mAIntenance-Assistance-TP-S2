@@ -2,7 +2,7 @@
 .env*.local
 .env
 
-/__pycache__/
+__pycache__
 /logs/
 
 Backend/logs/observability.jsonl
