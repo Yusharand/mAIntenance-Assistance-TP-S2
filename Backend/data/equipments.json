@@ -1,0 +1,4 @@
+{
+  "EQ-001": {"type": "portable", "modele": "Dell Latitude 5420", "utilisateur": "USR-001", "etat": "actif"},
+  "EQ-002": {"type": "imprimante", "modele": "HP LaserJet M404", "service": "comptabilite", "etat": "actif"}
+}

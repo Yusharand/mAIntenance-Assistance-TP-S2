@@ -1,0 +1,5 @@
+{
+  "incidents": [
+    {"id": "INC-001", "categorie": "reseau_connectivite", "description": "Panne partielle du VPN", "depuis": "2026-08-13T06:30:00"}
+  ]
+}

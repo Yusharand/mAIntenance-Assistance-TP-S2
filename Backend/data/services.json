@@ -1,0 +1,5 @@
+{
+  "messagerie": {"etat": "operationnel", "derniere_verification": "2026-08-13T08:00:00"},
+  "vpn": {"etat": "operationnel", "derniere_verification": "2026-08-13T08:00:00"},
+  "partage_fichiers": {"etat": "degrade", "derniere_verification": "2026-08-13T07:45:00"}
+}

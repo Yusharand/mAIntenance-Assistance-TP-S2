@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+pydantic>=2.0
+streamlit
+pandas
+
+# RAG (Personne 2) - décommenter selon le choix retenu
+# chromadb
+# sentence-transformers
+
+# LLM (choisir un fournisseur gratuit)
+# groq
+# google-generativeai
+
+# Tests / évaluation
+# scikit-learn
