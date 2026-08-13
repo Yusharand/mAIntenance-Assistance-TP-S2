@@ -1,3 +1,5 @@
+# Lien Front-End : https://front-m-a-intenance-assistance.vercel.app/
+
 # mAIntenance & Assistance
 
 Assistant intelligent de support informatique — Hackathon AI Engineering & ML, ISPM.
@@ -11,7 +13,6 @@ cp .env.example .env   # puis renseigne GROQ_API_KEY (voir https://console.groq.
 python run.py
 ```
 
-- API : http://localhost:8000/docs
 - Endpoint conversationnel (frontend NestJS ou autre) : `POST /chat` — voir `app/main.py`
 - Observabilité (JSON brut, à consommer par un dashboard externe) : `GET /observability/logs`
 - Tests des 4 scénarios obligatoires : `python -m tests.scenarios`
