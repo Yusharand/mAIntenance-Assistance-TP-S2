@@ -1,3 +1,15 @@
+# Nom du groupe : QUICKSILVER
+
+# Thème : mAItenance & Assistance
+
+# Date : 13/08/2026
+
+# Membres du groupe :
+- RANNDRIANOELINA Liantsoa Harimisa IGGLIA 5 N°14
+- ZAFIARISON Koloina Emile IGGLIA 5 N°16
+- RANDIMBINIRINA RAKOTOMANANA Yusha Andry Ny Aina IGGLIA 5 N°19
+- RASOLONJATOVO Zo Heriniaina IGGLIA 5 N°25
+
 # Lien Front-End : https://front-m-a-intenance-assistance.vercel.app/
 
 # mAIntenance & Assistance
