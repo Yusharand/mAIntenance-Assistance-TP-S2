@@ -12,11 +12,14 @@
 
 # Lien Front-End : https://front-m-a-intenance-assistance.vercel.app/
 
+# Lien Back-End : https://maintenance-assistance-tp-s2-1jg2.onrender.com
+
 # mAIntenance & Assistance
 
 Assistant intelligent de support informatique — Hackathon AI Engineering & ML, ISPM.
 
 ## Lancement
+   Au premier prompt de l'utilisateur, on peut apercevoir une légère lenteur de l'application en raison de la connexion de l'application avec Groq, l'application renvoye une requête que Groq reçoit, et l'attente du retour provoque un peu la lenteur. Il faut préciser aussi que l'application est une version en anglais, donc il est préférable que le prompt de l'utilisateur soit en anglais. Et il faut aussi bien détailler le prompt à envoyer pour avoir une meilleure réponse.
 
 ```bash
 python -m venv venv && source venv/bin/activate   # ou venv\Scripts\activate sous Windows
@@ -87,7 +90,7 @@ LLM ne constitue pas, à elle seule, une solution suffisante") :
   extractive / template figé) prend le relais automatiquement — le LLM n'est
   jamais un point de défaillance unique.
 
-## Approche choisie pour la classification / routage (P1)
+## Approche choisie pour la classification / routage 
 TF-IDF (1-2 grammes) + Régression Logistique multi-classes (`scikit-learn`),
 entraînée sur `app/training_data.py`. Choisi plutôt qu'un LLM en few-shot
 pour rester 100% traçable (`predict_proba` donne une vraie confiance
@@ -119,7 +122,7 @@ l'aléatoire sur des tickets français (vérifié empiriquement : confiance
 d'entraînement français de qualité comparable serait nécessaire pour une
 démo bilingue.
 
-## Fonctionnement du RAG (P2)
+## Fonctionnement du RAG 
 Recherche par similarité TF-IDF + cosinus (pas d'embeddings neuronaux, pour
 rester léger et sans dépendance lourde à installer). Chunking par section
 Markdown (`## titre`) plutôt que par nombre fixe de tokens, car la KB est
@@ -142,7 +145,7 @@ multilingue de tickets clients, dont les catégories ("queues") ne
 correspondaient pas à la taxonomie métier du projet et produisaient des
 documents de moindre qualité pour la démo.
 
-## Outils accessibles à l'agent (P3)
+## Outils accessibles à l'agent 
 Voir `app/tools.py` — 4 outils de consultation (lecture seule, jamais de
 validation requise) + 4 outils d'action (`OUTILS_SENSIBLES`, nécessitent
 toujours une validation humaine, voir `app/guardrails.py`). La sélection
