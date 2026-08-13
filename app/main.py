@@ -22,7 +22,7 @@ app = FastAPI(
 # CORS : permet au frontend NestJS (ou tout autre frontend) d'appeler l'API
 # depuis le navigateur. Origines configurables via FRONTEND_ORIGIN dans .env
 # (liste séparée par des virgules) — par défaut les ports NestJS/Angular usuels.
-_origins_env = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000,http://localhost:4200")
+_origins_env = os.environ.get("FRONTEND_ORIGIN", "http://localhost:3000,http://localhost:4200, https://front-m-a-intenance-assistance.vercel.app/")
 ALLOWED_ORIGINS = [o.strip() for o in _origins_env.split(",") if o.strip()]
 
 app.add_middleware(
