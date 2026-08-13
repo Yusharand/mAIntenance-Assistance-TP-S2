@@ -3,7 +3,7 @@
 >Machine Learning INFO5 2024-2025 **ISPM**
 # QUICKSILVER 🤖
 
-# Thème :  Éditeur de Texte Augmenté par l'IA pour le Malagasy
+# Thème :  mAIntenance & Assistance
 # Date : 24-03-26
 
 ## Institut Supérieur Polytechnique de Madagascar : http://www.ispm-edu.com/
