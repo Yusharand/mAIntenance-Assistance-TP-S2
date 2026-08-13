@@ -1,18 +1,18 @@
-# KB-NET-01 — Panne ou lenteur réseau
+# KB-NET-01 — Network outage or slowness
 
-## Diagnostic préalable
-1. Vérifier l'état du service réseau via `verifier_etat_service("reseau_local")`.
-2. Vérifier s'il existe déjà un incident actif de type réseau via
-   `rechercher_incidents_actifs("reseau_connectivite")` avant de créer un doublon.
-3. Demander à l'utilisateur s'il est en filaire ou en wifi, et si le problème
-   touche un seul poste ou plusieurs personnes du service.
+## Preliminary diagnosis
+1. Check the network service status via `verifier_etat_service("reseau_local")`.
+2. Check whether an active network-type incident already exists via
+   `rechercher_incidents_actifs("reseau_connectivite")` before creating a duplicate.
+3. Ask the user whether they are on wired or wifi, and whether the issue
+   affects a single workstation or several people in the department.
 
-## Résolution niveau 1
-- Redémarrer le routeur/switch local si le problème touche plusieurs postes.
-- Si un seul poste est concerné : vérifier le câble réseau, redémarrer la carte
-  réseau, tester avec un autre port.
+## Level-1 resolution
+- Restart the local router/switch if the issue affects several workstations.
+- If only one workstation is affected: check the network cable, restart the
+  network adapter, test with another port.
 
-## Escalade
-Si l'incident touche plus de 5 utilisateurs simultanément, escalader
-immédiatement vers l'équipe infrastructure sans attendre la confirmation de
-l'utilisateur (impact large = priorité haute par défaut).
+## Escalation
+If the incident affects more than 5 users simultaneously, escalate
+immediately to the infrastructure team without waiting for user
+confirmation (large impact = high priority by default).

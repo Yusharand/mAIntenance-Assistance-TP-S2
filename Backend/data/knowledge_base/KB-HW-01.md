@@ -1,14 +1,14 @@
-# KB-HW-01 — Panne matérielle poste de travail
+# KB-HW-01 — Workstation hardware failure
 
-## Symptômes courants et premières vérifications
-- Écran noir au démarrage : vérifier l'alimentation, tester avec un autre câble
-  vidéo, vérifier si un voyant d'activité est allumé sur le boîtier.
-- Poste qui ne s'allume plus : vérifier la prise et le bloc d'alimentation
-  avant toute intervention technique.
-- Surchauffe / extinction spontanée : suspecter un problème de ventilation,
-  ne pas réinstaller le système avant inspection physique.
+## Common symptoms and first checks
+- Black screen at startup: check the power supply, test with another video
+  cable, check whether an activity light is on at the case.
+- Workstation that no longer powers on: check the outlet and the power
+  supply unit before any technical intervention.
+- Overheating / spontaneous shutdown: suspect a ventilation problem, do not
+  reinstall the system before a physical inspection.
 
-## Quand escalader vers un technicien
-Toute intervention nécessitant l'ouverture du boîtier ou le remplacement d'un
-composant doit être confiée à un technicien sur site — ne jamais guider
-l'utilisateur pour ouvrir lui-même son poste.
+## When to escalate to a technician
+Any intervention requiring opening the case or replacing a component must
+be handled by an on-site technician — never guide the user to open their
+own workstation.

@@ -1,13 +1,13 @@
-# KB-PRINT-01 — Problèmes d'impression
+# KB-PRINT-01 — Printing issues
 
-## Procédure standard
-1. Vérifier l'état de l'imprimante via `consulter_equipement`.
-2. Vérifier la file d'attente d'impression côté poste utilisateur.
-3. Redémarrer le spouleur d'impression si des documents restent bloqués en file.
+## Standard procedure
+1. Check the printer's status via `consulter_equipement`.
+2. Check the print queue on the user's workstation.
+3. Restart the print spooler if documents remain stuck in the queue.
 
-## Cas fréquents
-- "Cartouche vide" alors qu'elle est neuve : souvent un problème de détection,
-  retirer et réinsérer la cartouche avant remplacement.
-- Bourrage papier répété : vérifier le bac papier et le type de papier utilisé.
-- Impossible d'imprimer en réseau : vérifier que l'imprimante est bien sur le
-  même réseau que le poste, redémarrer le service d'impression.
+## Common cases
+- "Cartridge empty" when it is actually new: often a detection issue,
+  remove and reinsert the cartridge before replacing it.
+- Repeated paper jams: check the paper tray and the type of paper used.
+- Cannot print over the network: check that the printer is on the same
+  network as the workstation, restart the print service.

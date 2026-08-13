@@ -1,28 +1,4 @@
-"""
-PERSONNE 3 (partie 1/3) — Outils de l'agent (contribue à l'axe Agent, 20%)
-============================================================================
 
-DÉMARCHE
---------
-Les 8 outils du sujet (section 3.4) sont simulés sur les fichiers JSON de
-data/ (utilisateurs, équipements, services, incidents) plutôt que connectés à
-un vrai système d'information — c'est explicitement autorisé par le sujet
-("outils réels ou simulés").
-
-Chaque outil :
-  1. VALIDE ses paramètres avant toute exécution (type, présence, existence en
-     base) -> exigence "validation des paramètres" section 5.2.
-  2. Renvoie toujours un dict avec une clé "erreur" en cas de problème, jamais
-     une exception qui remonterait telle quelle jusqu'à l'utilisateur.
-  3. Est enregistré dans TOOL_REGISTRY avec sa liste de paramètres attendus
-     (TOOL_SPECS) -> utilisé par agent.py pour valider AVANT l'appel, pas
-     seulement en le laissant planter.
-
-Les outils d'action (creer_ticket, mettre_a_jour_ticket, affecter_ticket,
-escalader_vers_technicien) modifient un état -> ils sont dans OUTILS_SENSIBLES
-et ne sont JAMAIS exécutés directement par l'agent sans validation humaine
-préalable (section 6 du sujet).
-"""
 import json
 import uuid
 from pathlib import Path

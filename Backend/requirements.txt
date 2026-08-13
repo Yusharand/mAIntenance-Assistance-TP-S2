@@ -1,16 +1,11 @@
 fastapi
 uvicorn[standard]
 pydantic>=2.0
-streamlit
+python-dotenv
+
+# Classification (Personne 1) + RAG TF-IDF (Personne 2)
+scikit-learn
 pandas
 
-# RAG (Personne 2) - décommenter selon le choix retenu
-# chromadb
-# sentence-transformers
-
-# LLM (choisir un fournisseur gratuit)
-# groq
-# google-generativeai
-
-# Tests / évaluation
-# scikit-learn
+# LLM — synthèse RAG (rag.py) et reformulation conversationnelle (chat.py)
+groq

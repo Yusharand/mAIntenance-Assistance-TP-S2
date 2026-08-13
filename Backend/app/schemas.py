@@ -1,8 +1,4 @@
-"""
-Schémas Pydantic — Personne 1 & Personne 4
-Toute donnée qui transite entre les modules DOIT passer par un de ces schémas.
-C'est ce qui garantit des "sorties structurées" (exigence 5.3 du sujet).
-"""
+
 from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from datetime import datetime
@@ -84,3 +80,21 @@ class DecisionFinale(BaseModel):
     etapes_resolution: list[str] = []
     outils_utilises: list[str] = []
     incertitude_notes: Optional[str] = None
+    questions_a_poser: list[str] = []
+
+
+class ChatRequest(BaseModel):
+    """Requête envoyée par le frontend (NestJS) sur POST /chat."""
+    message: str
+    conversation_id: Optional[str] = None
+    utilisateur_id: Optional[str] = None
+
+
+class ChatResponse(BaseModel):
+    """Réponse de POST /chat : reformulation conversationnelle de la
+    DecisionFinale calculée par le pipeline déterministe (classifier -> RAG ->
+    agent). Le champ `decision` reste la sortie structurée complète, pour un
+    frontend qui voudrait afficher plus de détail que la seule reponse texte."""
+    reponse: str
+    decision: DecisionFinale
+    conversation_id: Optional[str] = None

@@ -1,13 +1,13 @@
-# KB-AUTH-01 — Réinitialisation de mot de passe
+# KB-AUTH-01 — Password reset
 
-## Procédure standard
-1. Vérifier l'identité de l'utilisateur (nom, service, identifiant).
-2. Envoyer un lien de réinitialisation à l'adresse email professionnelle enregistrée.
-3. Si l'utilisateur ne reçoit pas l'email sous 5 minutes, vérifier le dossier spam
-   puis vérifier que l'adresse email en base est correcte.
-4. La réinitialisation d'un mot de passe est une action sensible : elle doit
-   toujours être validée par un technicien humain avant application.
+## Standard procedure
+1. Verify the user's identity (name, department, employee ID).
+2. Send a reset link to the registered professional email address.
+3. If the user does not receive the email within 5 minutes, check the spam
+   folder, then verify that the email address on file is correct.
+4. Resetting a password is a sensitive action: it must always be validated
+   by a human technician before being applied.
 
-## Cas particulier : compte verrouillé après échecs multiples
-Un compte se verrouille automatiquement après 5 tentatives échouées. Le
-déverrouillage nécessite une validation manuelle par l'équipe support niveau 2.
+## Special case: account locked after multiple failures
+An account locks automatically after 5 failed attempts. Unlocking it
+requires manual validation by the level-2 support team.

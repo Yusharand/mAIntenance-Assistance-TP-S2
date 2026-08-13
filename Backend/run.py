@@ -1,38 +1,24 @@
 """
 Fichier de lancement unique (livrable obligatoire #2 du sujet).
-Lance l'API FastAPI ET ouvre le dashboard Streamlit.
+Lance uniquement l'API FastAPI — le frontend (NestJS) est un projet séparé
+qui consomme cette API (voir README.md pour les endpoints /chat et /ticket).
 
 Usage : python run.py
 """
-import subprocess
+import os
 import sys
-import time
-import webbrowser
+
+import uvicorn
 
 
 def main():
-    print("Démarrage de l'API FastAPI sur http://localhost:8000 ...")
-    api_process = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "app.main:app", "--port", "8000"]
-    )
-    time.sleep(2)
+    port = int(os.environ.get("PORT", 8000))
+    print(f"Démarrage de l'API FastAPI sur http://localhost:{port} ...")
+    print(f"Docs interactives      : http://localhost:{port}/docs")
+    print(f"Endpoint conversationnel (frontend) : POST http://localhost:{port}/chat")
+    print("Ctrl+C pour arrêter.\n")
 
-    print("Démarrage du dashboard Streamlit sur http://localhost:8501 ...")
-    demo_process = subprocess.Popen(
-        [sys.executable, "-m", "streamlit", "run", "demo/streamlit_app.py"]
-    )
-
-    print("\n--- mAIntenance & Assistance ---")
-    print("API docs      : http://localhost:8000/docs")
-    print("Démo + dashboard : http://localhost:8501")
-    print("Ctrl+C pour arrêter les deux services.\n")
-
-    try:
-        api_process.wait()
-        demo_process.wait()
-    except KeyboardInterrupt:
-        api_process.terminate()
-        demo_process.terminate()
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
 
 
 if __name__ == "__main__":

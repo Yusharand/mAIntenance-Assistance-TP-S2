@@ -1,44 +1,4 @@
-"""
-PERSONNE 2 — Recherche documentaire / RAG (axe noté : 20%)
-============================================================
 
-DÉMARCHE / MÉTHODOLOGIE
-------------------------
-Choix : recherche par similarité TF-IDF + cosinus (scikit-learn), PAS
-d'embeddings neuronaux (sentence-transformers).
-
-Justification de ce choix (à mettre dans le rapport, section "limites") :
-  - Aucune dépendance lourde (pas de téléchargement de modèle de plusieurs
-    centaines de Mo, pas de risque de lenteur/échec de setup pendant les 8h
-    du hackathon).
-  - Corpus de connaissances technique avec vocabulaire très spécifique
-    (noms de procédures, codes KB-XXX, termes techniques) : le TF-IDF, basé
-    sur la fréquence des mots exacts, est en réalité compétitif voire meilleur
-    que des embeddings généralistes sur ce type de corpus restreint et jargonné.
-  - Entièrement local, gratuit, déterministe, donc évaluable et reproductible
-    (pas de variabilité d'une exécution à l'autre comme avec un appel LLM).
-Limite assumée : le TF-IDF ne capture pas la similarité sémantique
-("mot de passe" vs "identifiants" seront moins bien rapprochés qu'avec des
-embeddings). À documenter comme piste d'amélioration si le temps le permet.
-
-CHUNKING
---------
-Chaque document Markdown est découpé par section (## Titre), pas par nombre
-fixe de tokens : les documents de la KB sont déjà structurés en sections
-cohérentes (procédure standard, cas particuliers, escalade...), donc découper
-sur cette structure logique donne des chunks plus pertinents qu'un découpage
-aveugle par 300 tokens.
-
-SYNTHÈSE DE RÉPONSE
---------------------
-Sans clé API LLM garantie disponible pendant le hackathon, `answer_with_citations`
-fait une synthèse EXTRACTIVE (assemble les passages les plus pertinents avec
-leurs sources) plutôt que générative. C'est un choix délibéré : zéro risque
-d'hallucination de procédure (risque explicitement cité section 6 du sujet),
-au prix d'une réponse moins fluide. Si un LLM est disponible côté équipe,
-`generer_reponse_llm()` montre où brancher un appel réel — le prompt est
-construit pour forcer le modèle à rester dans les passages fournis.
-"""
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -160,26 +120,33 @@ def _synthese_extractive(sources: list[SourceCitee]) -> str:
 
 
 def generer_reponse_llm(query: str, sources: list[SourceCitee]) -> str:
-    """OPTIONNEL — à activer si l'équipe dispose d'une clé API LLM (Groq/Gemini).
-    Le prompt est conçu pour interdire explicitement toute information hors
-    des passages fournis, afin d'éviter la génération d'une procédure
-    inexistante (risque cité section 6 du sujet)."""
-    contexte = "\n\n".join(f"[{s.document_id}]\n{s.extrait}" for s in sources)
-    prompt = f"""Tu es un assistant de support informatique. Réponds à la question
-UNIQUEMENT à partir des passages ci-dessous. Si les passages ne suffisent pas,
-dis explicitement que l'information n'est pas disponible. Cite les identifiants
-de document entre crochets pour chaque affirmation.
+    """Synthèse générative via Groq, activée uniquement si `use_llm=True` ET
+    qu'une clé GROQ_API_KEY est configurée. Le prompt interdit explicitement
+    toute information hors des passages fournis, afin d'éviter la génération
+    d'une procédure inexistante (risque cité section 6 du sujet). En cas
+    d'échec (clé absente, réseau, timeout...), l'appelant (answer_with_citations)
+    retombe automatiquement sur la synthèse extractive — le LLM n'est jamais
+    un point de défaillance unique."""
+    from app.llm_client import call_llm
 
-Passages disponibles :
+    contexte = "\n\n".join(f"[{s.document_id}]\n{s.extrait}" for s in sources)
+    system = (
+        "You are an IT support assistant. Answer the question ONLY using the "
+        "passages provided below. If the passages are not sufficient, say "
+        "explicitly that the information is not available. Cite document "
+        "identifiers in brackets for every claim. Never propose a procedure "
+        "that is not present in the passages."
+    )
+    prompt = f"""Available passages:
 {contexte}
 
-Question : {query}
+Question: {query}
 
-Réponse :"""
-    # TODO: brancher l'appel API réel ici, ex. avec le SDK Groq :
-    # response = client.chat.completions.create(model=..., messages=[{"role": "user", "content": prompt}])
-    # return response.choices[0].message.content
-    raise NotImplementedError("Brancher ici l'appel au LLM choisi par l'équipe.")
+Answer:"""
+    reponse = call_llm(prompt, system=system, temperature=0.2, max_tokens=400)
+    if reponse is None:
+        raise NotImplementedError("Appel LLM indisponible (clé absente ou erreur réseau).")
+    return reponse.strip()
 
 
 def answer_with_citations(query: str, use_llm: bool = False) -> RAGResult:
@@ -212,12 +179,12 @@ def answer_with_citations(query: str, use_llm: bool = False) -> RAGResult:
 # ---------------------------------------------------------------------------
 
 JEU_TEST_RAG = [
-    ("mon mot de passe ne fonctionne plus", "KB-AUTH-01"),
-    ("le wifi est coupé pour tout le service", "KB-NET-01"),
-    ("mon ordinateur ne s'allume plus", "KB-HW-01"),
-    ("impossible d'imprimer depuis mon poste", "KB-PRINT-01"),
-    ("je n'ai plus accès au dossier partagé", "KB-ACCESS-01"),
-    ("j'ai reçu un email de phishing suspect", "KB-SEC-01"),
+    ("my password doesn't work anymore", "KB-AUTH-01"),
+    ("the wifi is down for the whole department", "KB-NET-01"),
+    ("my computer won't turn on anymore", "KB-HW-01"),
+    ("I can't print from my workstation", "KB-PRINT-01"),
+    ("I no longer have access to the shared folder", "KB-ACCESS-01"),
+    ("I received a suspicious phishing email", "KB-SEC-01"),
 ]
 
 

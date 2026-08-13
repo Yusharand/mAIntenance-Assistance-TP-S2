@@ -1,47 +1,20 @@
-"""
-PERSONNE 3 (partie 2/3) — Garde-fous & sécurité (axes Agent 20% + Sécurité 10%)
-==================================================================================
-
-DÉMARCHE
---------
-Couvre chacun des risques listés section 6 du sujet, avec une approche par
-règles explicites (regex + heuristiques) plutôt qu'un modèle de détection
-entraîné : on n'a pas de jeu de données d'attaques suffisant pour entraîner un
-classifieur de prompt injection en 8h, et des règles mal justifiées seraient
-pires qu'un modèle honnête à faible confiance. Les règles ci-dessous sont
-documentées une par une pour rester auditables par le jury.
-
-1. detect_prompt_injection() : patterns de tentative de manipulation de
-   l'assistant (Scénario 4 obligatoire du sujet).
-2. is_sensitive_action() : combine la liste d'outils sensibles (tools.py) ET
-   la logique métier (catégorie cybersécurité => toujours validation humaine,
-   même sur un outil "non sensible").
-3. is_out_of_distribution() : détecte un ticket "inhabituel" (trop court, trop
-   long, langue différente, absence totale de mots-clés reconnus) -> répond à
-   l'analyse complémentaire optionnelle citée section 3.1 du sujet.
-4. redact_personal_data() : masque emails/téléphones dans les logs, réponse au
-   risque "présence de données personnelles" (section 6).
-
-Chaque détection est loggée avec sa raison exacte (pas juste un booléen) pour
-que l'observabilité (Personne 4) puisse tracer POURQUOI une action a été
-refusée — important pour la démo du Scénario 4 et pour le rapport.
-"""
 import re
 
 # Patterns de tentative de manipulation de l'assistant (prompt injection).
 # Volontairement larges (faux positifs possibles) car en sécurité on préfère
 # sur-détecter et demander une validation humaine plutôt que sous-détecter.
 INJECTION_PATTERNS = [
-    (r"ignore[z]?\s+(les\s+|tes\s+)?instructions?", "tentative de contournement des instructions"),
-    (r"tu\s+es\s+maintenant", "tentative de changement de rôle de l'assistant"),
-    (r"nouveau\s+r[oô]le", "tentative de changement de rôle de l'assistant"),
-    (r"oublie\s+(tout|ce\s+qui\s+precede|ce\s+qui\s+précède)", "tentative d'effacement de contexte"),
+    (r"ignore\s+(your\s+|all\s+|previous\s+)?instructions?", "tentative de contournement des instructions"),
+    (r"you\s+are\s+now\s+", "tentative de changement de rôle de l'assistant"),
+    (r"new\s+role", "tentative de changement de rôle de l'assistant"),
+    (r"forget\s+(everything|all\s+of\s+the\s+above|the\s+above)", "tentative d'effacement de contexte"),
     (r"system\s*:", "tentative d'injection de faux message système"),
-    (r"execute[z]?\s+la\s+commande", "tentative d'exécution de commande arbitraire"),
-    (r"supprime[z]?\s+tous\s+les", "demande de suppression massive suspecte"),
-    (r"donne[z]?[- ]moi\s+(le\s+)?mot\s+de\s+passe\s+(admin|administrateur)", "demande d'identifiants privilégiés"),
-    (r"acc[eè]s\s+(root|administrateur)\s+(a|à)\s+tous", "demande de privilèges élevés injustifiée"),
-    (r"r[eé]v[eè]le\s+tes\s+instructions", "tentative d'extraction du prompt système"),
+    (r"execute\s+the\s+command", "tentative d'exécution de commande arbitraire"),
+    (r"delete\s+all\s+", "demande de suppression massive suspecte"),
+    (r"give\s+me\s+the\s+(admin|administrator)\s+password", "demande d'identifiants privilégiés"),
+    (r"(root|administrator)\s+access\s+(to|for)\s+everyone", "demande de privilèges élevés injustifiée"),
+    (r"reveal\s+your\s+(system\s+)?instructions", "tentative d'extraction du prompt système"),
+    (r"disregard\s+(your\s+|all\s+|previous\s+)?instructions?", "tentative de contournement des instructions"),
 ]
 
 

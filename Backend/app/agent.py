@@ -1,30 +1,4 @@
-"""
-PERSONNE 3 (partie 3/3) — Boucle de l'agent (axe noté : 20%)
-===============================================================
 
-DÉMARCHE
---------
-Sélection d'outils DÉTERMINISTE par règles (build_tool_plan), pas de
-tool-calling LLM : plus lent à mettre en place côté prompt engineering et
-moins prévisible pour une démo de 8h, alors qu'un plan explicite par
-catégorie est trivial à auditer par le jury ("pourquoi l'agent a appelé cet
-outil ?" -> réponse dans build_tool_plan, ligne par ligne).
-Si l'équipe a le temps et une clé API LLM, cette fonction est le seul
-endroit à remplacer par un appel de function-calling — le reste de la boucle
-(validation, garde-fous, logging) reste identique.
-
-GARANTIES DE SÉCURITÉ DE LA BOUCLE (section 5.2 et 6 du sujet)
------------------------------------------------------------------
-1. Contrôle du nombre d'actions : MAX_APPELS_OUTILS borne strictement le
-   nombre d'appels, quel que soit le plan proposé.
-2. Validation des paramètres AVANT appel (pas de try/except comme seule
-   protection) : `_valider_parametres`.
-3. Aucun outil sensible n'est exécuté sans passer par le statut
-   "en_attente_validation_humaine" — l'agent NE DÉCIDE JAMAIS seul d'agir sur
-   un compte, des droits, ou un incident de cybersécurité.
-4. Toute tentative de prompt injection stoppe la boucle immédiatement, avant
-   même de sélectionner un outil.
-"""
 from app.schemas import ToolCallLog
 from app.tools import TOOL_REGISTRY, TOOL_SPECS
 from app.guardrails import is_sensitive_action, detect_prompt_injection
@@ -61,7 +35,7 @@ def build_tool_plan(categorie: str, ticket_texte: str, contexte: dict) -> list[t
             plan.append(("rechercher_utilisateur", {"utilisateur_id": utilisateur_id}))
         plan.append(("creer_ticket", {
             "categorie": categorie, "priorite": "moyenne",
-            "description": "Réinitialisation de mot de passe / déblocage de compte",
+            "description": "Password reset / account unlock",
         }))
 
     elif categorie == "reseau_connectivite":
@@ -70,7 +44,7 @@ def build_tool_plan(categorie: str, ticket_texte: str, contexte: dict) -> list[t
         if impact:
             plan.append(("escalader_vers_technicien", {
                 "ticket_id": contexte.get("ticket_id", "INCONNU"),
-                "raison": "Impact réseau sur plusieurs utilisateurs",
+                "raison": "Network impact affecting multiple users",
             }))
 
     elif categorie == "materiel_informatique":
@@ -78,7 +52,7 @@ def build_tool_plan(categorie: str, ticket_texte: str, contexte: dict) -> list[t
             plan.append(("consulter_equipement", {"equipement_id": equipement}))
         plan.append(("creer_ticket", {
             "categorie": categorie, "priorite": "moyenne",
-            "description": f"Panne matérielle : {ticket_texte[:120]}",
+            "description": f"Hardware failure: {ticket_texte[:120]}",
         }))
 
     elif categorie == "logiciels_applications":
@@ -86,7 +60,7 @@ def build_tool_plan(categorie: str, ticket_texte: str, contexte: dict) -> list[t
             plan.append(("verifier_etat_service", {"service": application}))
         plan.append(("creer_ticket", {
             "categorie": categorie, "priorite": "moyenne",
-            "description": f"Incident logiciel : {ticket_texte[:120]}",
+            "description": f"Software incident: {ticket_texte[:120]}",
         }))
 
     elif categorie == "imprimantes_peripheriques":
@@ -104,13 +78,13 @@ def build_tool_plan(categorie: str, ticket_texte: str, contexte: dict) -> list[t
         plan.append(("rechercher_incidents_actifs", {"categorie": categorie}))
         plan.append(("escalader_vers_technicien", {
             "ticket_id": contexte.get("ticket_id", "INCONNU"),
-            "raison": "Incident de cybersécurité — escalade systématique",
+            "raison": "Cybersecurity incident — systematic escalation",
         }))
 
     else:  # autre_indetermine
         plan.append(("creer_ticket", {
             "categorie": categorie, "priorite": "basse",
-            "description": f"Ticket non classable : {ticket_texte[:120]}",
+            "description": f"Unclassifiable ticket: {ticket_texte[:120]}",
         }))
 
     return plan

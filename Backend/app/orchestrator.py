@@ -1,12 +1,4 @@
-"""
-PERSONNE 4 (partie 2/2) — Orchestrateur (le "chef d'orchestre" du pipeline)
-==============================================================================
-C'est le module le plus important pour l'INTÉGRATION. Il appelle dans l'ordre
-les modules des 3 autres personnes et assemble la DecisionFinale (schéma imposé
-section 5.3). Ne commence à le finaliser qu'une fois que chaque module a au moins
-une version fonctionnelle (même basique) -> prévoir un point de sync vers 11h00
-et un autre vers 13h30 (voir répartition horaire).
-"""
+
 from app.schemas import TicketInput, DecisionFinale
 from app.classifier import classify_ticket, extract_diagnostic_info
 from app.rag import answer_with_citations
@@ -26,7 +18,7 @@ def process_ticket(ticket: TicketInput) -> DecisionFinale:
             confiance=0.0,
             action="refus",
             validation_humaine_requise=True,
-            incertitude_notes=f"Tentative de manipulation détectée : {raison_injection}.",
+            incertitude_notes=f"Manipulation attempt detected: {raison_injection}.",
         )
         log_decision_finale(ticket.ticket_id, decision.model_dump())
         return decision
@@ -52,11 +44,12 @@ def process_ticket(ticket: TicketInput) -> DecisionFinale:
             action="demande_information",
             validation_humaine_requise=False,
             resume_probleme=ticket.texte,
+            questions_a_poser=diagnostic.questions_a_poser,
         )
 
     # 4. RAG
     with Timer() as t:
-        rag_result = answer_with_citations(ticket.texte)
+        rag_result = answer_with_citations(ticket.texte, use_llm=True)
     log_step("rag", {"query": ticket.texte}, rag_result.model_dump(), t.elapsed)
 
     # 5. Agent + outils
@@ -89,7 +82,7 @@ def process_ticket(ticket: TicketInput) -> DecisionFinale:
         diagnostic=diagnostic.symptomes,
         etapes_resolution=[rag_result.reponse_proposee] if rag_result.reponse_proposee else [],
         outils_utilises=[l.nom_outil for l in tool_logs],
-        incertitude_notes=None if rag_result.reponse_suffisamment_soutenue else "Aucune source suffisamment pertinente trouvée.",
+        incertitude_notes=None if rag_result.reponse_suffisamment_soutenue else "No sufficiently relevant source was found.",
     )
 
     log_decision_finale(ticket.ticket_id, decision.model_dump())

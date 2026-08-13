@@ -1,45 +1,4 @@
-"""
-PERSONNE 1 — Classification & Diagnostic (axe noté : 20%)
-=========================================================
 
-DÉMARCHE / MÉTHODOLOGIE
-------------------------
-1. Classification de catégorie :
-   TF-IDF (1-2 grammes de mots) + Régression Logistique multi-classes, entraînée
-   sur `training_data.TRAINING_DATA`.
-   Pourquoi ce choix plutôt qu'un LLM en few-shot ou des règles pures ?
-     - Data-driven et traçable : aucune probabilité n'est fixée à la main, tout
-       sort de l'apprentissage sur les exemples fournis (principe : pas de poids
-       numérique sans source justifiable).
-     - Gratuit, aucun appel API, latence quasi nulle -> bon compromis pour un
-       hackathon de 8h où la fiabilité de la démo compte plus que la sophistication.
-     - `predict_proba` donne une confiance réellement calibrée sur le modèle
-       (contrairement à un score de règle inventé).
-   Limite assumée et à documenter dans le rapport : le jeu d'entraînement est
-   petit (~55 exemples) et écrit à la main -> à réentraîner sur l'historique réel
-   de tickets (data/tickets_history.json) dès qu'il est disponible pour un vrai
-   test de généralisation (voir evaluate_classifier()).
-
-2. Priorité :
-   Score composite = sévérité de base de la catégorie (cybersécurité et réseau
-   plus critiques par nature) + bonus si mots-clés d'urgence/impact détectés.
-   Volontairement PAS un modèle ML séparé : on n'a pas de données étiquetées en
-   priorité assez nombreuses pour ce sous-problème -> on utilise une règle
-   explicite et justifiée plutôt qu'un modèle mal entraîné sur trop peu de
-   données (cf. limite documentée plus haut, même logique que pour l'IPEF :
-   ne pas produire un chiffre non traçable).
-
-3. Diagnostic (extraction d'informations) :
-   Extraction par règles (mots-clés / expressions régulières) des champs demandés
-   section 3.2 du sujet. Une vraie solution NER/LLM serait plus robuste mais les
-   règles suffisent pour la démo et restent 100% explicables au jury.
-
-ÉVALUATION
-----------
-`evaluate_classifier()` fait un split train/test stratifié et calcule accuracy
-et F1 par catégorie -> résultats à copier dans le rapport technique et dans
-data/resultats_evaluation.json (livrable 6).
-"""
 import re
 from functools import lru_cache
 
@@ -131,12 +90,7 @@ def evaluate_classifier(test_size: float = 0.25, random_state: int = 42) -> dict
         "taille_test": len(X_test),
         "rapport_par_categorie": classification_report(
             y_test, y_pred, zero_division=0, output_dict=True
-        ),
-        "limite": (
-            "Jeu de test très petit (dataset de démo écrit à la main) : ces "
-            "chiffres illustrent la méthode, pas une performance généralisable. "
-            "À refaire sur l'historique réel de tickets avant la remise finale."
-        ),
+        )
     }
 
 
@@ -158,10 +112,10 @@ SEVERITE_BASE = {
     "autre_indetermine": 1,
 }
 
-MOTS_URGENCE = ["urgent", "bloqué", "bloque", "impossible de travailler",
-                "immédiat", "immediat", "critique", "grave"]
-MOTS_IMPACT_LARGE = ["tous les", "toute l'équipe", "toute l'equipe", "tout le service",
-                      "personne ne peut", "plus personne", "l'ensemble"]
+MOTS_URGENCE = ["urgent", "blocked", "can't work", "cannot work",
+                "immediate", "immediately", "critical", "severe", "asap"]
+MOTS_IMPACT_LARGE = ["everyone", "the whole team", "the entire team", "the whole department",
+                      "nobody can", "no one can", "all of us"]
 
 NIVEAUX = ["basse", "moyenne", "haute", "critique"]
 
@@ -183,21 +137,22 @@ def _determiner_priorite(texte: str, categorie: str) -> str:
 # 3. DIAGNOSTIC — extraction d'informations par règles (section 3.2 du sujet)
 # ---------------------------------------------------------------------------
 
-EQUIPEMENTS_CONNUS = ["ordinateur", "pc portable", "portable", "poste", "laptop",
-                      "imprimante", "scanner", "écran", "ecran", "clavier", "souris"]
-APPLICATIONS_CONNUES = ["word", "excel", "outlook", "crm", "vpn", "messagerie",
-                         "logiciel de facturation", "application rh", "teams", "drive"]
+EQUIPEMENTS_CONNUS = ["computer", "laptop", "workstation", "desktop", "pc",
+                      "printer", "scanner", "screen", "monitor", "keyboard", "mouse"]
+APPLICATIONS_CONNUES = ["word", "excel", "outlook", "crm", "vpn", "email",
+                         "mail server", "mail", "billing software", "hr application",
+                         "teams", "drive", "server"]
 MOTS_MOMENT = {
-    r"\bce matin\b": "ce matin",
-    r"\bhier\b": "hier",
-    r"\bdepuis\s+\d+\s*(jour|jours|heure|heures|semaine|semaines)": None,  # capturé dynamiquement
-    r"\baujourd'?hui\b": "aujourd'hui",
+    r"\bthis morning\b": "this morning",
+    r"\byesterday\b": "yesterday",
+    r"\bsince\s+\d+\s*(day|days|hour|hours|week|weeks)": None,  # captured dynamically
+    r"\btoday\b": "today",
 }
-MOTS_MANIPULATIONS = ["j'ai redémarré", "j'ai redemarre", "j'ai déjà essayé",
-                       "j'ai deja essaye", "j'ai réinstallé", "j'ai reinstalle",
-                       "j'ai débranché", "j'ai debranche", "j'ai testé", "j'ai teste"]
-MOTS_IMPACT = ["je ne peux plus travailler", "bloqué", "bloque", "impossible de",
-               "urgent", "toute l'équipe", "toute l'equipe"]
+MOTS_MANIPULATIONS = ["i restarted", "i already tried", "i tried",
+                       "i reinstalled", "i unplugged", "i tested",
+                       "i rebooted", "i checked"]
+MOTS_IMPACT = ["i can't work anymore", "i cannot work", "blocked", "unable to",
+               "urgent", "the whole team", "the entire team"]
 
 
 def _detecter_element(texte_lower: str, liste: list[str]) -> str | None:
@@ -208,15 +163,15 @@ def _detecter_element(texte_lower: str, liste: list[str]) -> str | None:
 
 
 def _detecter_moment(texte_lower: str) -> str | None:
-    m = re.search(r"depuis\s+\d+\s*(jour|jours|heure|heures|semaine|semaines)", texte_lower)
+    m = re.search(r"since\s+\d+\s*(day|days|hour|hours|week|weeks)", texte_lower)
     if m:
         return m.group(0)
-    if "ce matin" in texte_lower:
-        return "ce matin"
-    if "hier" in texte_lower:
-        return "hier"
-    if "aujourd'hui" in texte_lower or "aujourdhui" in texte_lower:
-        return "aujourd'hui"
+    if "this morning" in texte_lower:
+        return "this morning"
+    if "yesterday" in texte_lower:
+        return "yesterday"
+    if "today" in texte_lower:
+        return "today"
     return None
 
 
@@ -239,13 +194,13 @@ def extract_diagnostic_info(ticket: TicketInput) -> DiagnosticResult:
 
     if not equipement and not application:
         manquants.append("equipement_ou_application")
-        questions.append("Quel équipement ou quelle application est concerné(e) précisément ?")
+        questions.append("Which device or application exactly is affected?")
     if not moment:
         manquants.append("moment_apparition")
-        questions.append("Depuis quand rencontrez-vous ce problème ?")
+        questions.append("Since when have you been experiencing this issue?")
     if trop_court:
         manquants.append("description_detaillee")
-        questions.append("Pouvez-vous décrire plus précisément le problème rencontré et son contexte ?")
+        questions.append("Could you describe the problem and its context in more detail?")
 
     return DiagnosticResult(
         equipement=equipement,
